@@ -3,7 +3,7 @@
 
 <head>
     <title>プログラミング言語III及び演習</title>
-    <meta http-equiv="content-type" charset="UTF-8">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <style>
         .calc-button {
             width: 50px;
@@ -74,35 +74,34 @@
         $result .= '*';
     } elseif (isset($_POST['KEY_/'])) {
         $result .= '/';
-    } elseif (isset($_POST['KEY_='])) {
-        if (strpos($result, '+') !== false) {
-            $parts = explode('+', $result);
-            if (count($parts) == 2) {
-                $result = $parts[0] + $parts[1];
-            }
-        } elseif (strpos($result, '-') !== false) {
-            $parts = explode('-', $result);
-            if (count($parts) == 2) {
-                $result = $parts[0] - $parts[1];
-            }
-        } elseif (strpos($result, '*') !== false) {
-            $parts = explode('*', $result);
-            if (count($parts) == 2) {
-                $result = $parts[0] * $parts[1];
-            }
-        } elseif (strpos($result, '/') !== false) {
-            $parts = explode('/', $result);
-            if (count($parts) == 2 && $parts[1] != 0) {
-                $result = $parts[0] / $parts[1];
-            }
+    } elseif (isset($_POST['KEY_deci'])) {
+        if (strlen($result) > 0 && !in_array(substr($result, -1), array('*', '/', '+', '-', '.'))) {
+            $result .= ".";
+        } elseif (strlen($result) == 0) {
+            $result = '0.';
         }
+    } elseif (isset($_POST['KEY_='])) {
+        $result = eval('return ' . $result . ';');
     }
 
-    function output_result($str)
+    function format_expression($expression)
     {
-        return $str;
+        $expression = str_replace('*', '&times;', $expression);
+        $expression = str_replace('/', '&divide;', $expression);
+        return $expression;
     }
+
+    function format_result($result)
+    {
+        // 入力された桁数を取得
+        $decimalPlaces = strlen(substr(strrchr($result, "."), 1));
+
+        // 入力された桁数まで計算結果を表示
+        return number_format($result, $decimalPlaces);
+    }
+
     ?>
+
 
     <form method="post" action="./kadai08_1.php">
         <input type="hidden" name="result" value="<?php echo $result; ?>" />
@@ -129,18 +128,17 @@
         <br>
         <button class="calc-button" type="submit" value="KEY_0" name="KEY_0"> 0 </button>
         <button class="calc-button" type="submit" value="KEY_00" name="KEY_00"> 00 </button>
-        <button class="calc-button" type="submit" value="KEY_." name="KEY_."> . </button>
+        <button class="calc-button" type="submit" value="KEY_deci" name="KEY_deci"> . </button>
         <button class="calc-button" type="submit" value="KEY_=" name="KEY_="> = </button>
-
     </form>
 
     <!-- 計算結果の出力 -->
     <p>
-        入力式: <?php echo $result; ?>
+        入力式: <?php echo format_expression($result); ?>
     </p>
 
     <p>
-        計算結果: <?php echo output_result($result); ?>
+        計算結果: <?php echo format_result($result); ?>
     </p>
 
 </body>
