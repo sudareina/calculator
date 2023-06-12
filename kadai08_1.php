@@ -34,7 +34,7 @@
     <h2> 電卓アプリ </h2>
 
     <?php
-    $result = $_POST['result'];
+    $result = isset($_POST['result']) ? $_POST['result'] : '';
 
     if (isset($_POST['KEY_1'])) {
         $result .= '1';
@@ -65,7 +65,7 @@
     } elseif (isset($_POST['KEY_AC'])) {
         $result = "";
     } elseif (isset($_POST['KEY_%'])) {
-        $result .= "*0.01";
+        $result .= '*0.01';
     } elseif (isset($_POST['KEY_+'])) {
         $result .= '+';
     } elseif (isset($_POST['KEY_-'])) {
@@ -74,6 +74,16 @@
         $result .= '*';
     } elseif (isset($_POST['KEY_/'])) {
         $result .= '/';
+    } elseif (isset($_POST['KEY_('])) {
+        $result .= '(';
+    } elseif (isset($_POST['KEY_)'])) {
+        $result .= ')';
+    } elseif (isset($_POST['KEY_syn'])) {
+        $result .= '^';
+    } elseif (isset($_POST['KEY_log'])) {
+        $result .= 'log(';
+    } elseif (isset($_POST['KEY_comma'])) {
+        $result .= ',';
     } elseif (isset($_POST['KEY_deci'])) {
         if (strlen($result) > 0 && !in_array(substr($result, -1), array('*', '/', '+', '-', '.'))) {
             $result .= ".";
@@ -81,7 +91,46 @@
             $result = '0.';
         }
     } elseif (isset($_POST['KEY_='])) {
-        $result = eval('return ' . $result . ';');
+        // 入力式のパースと評価
+        $result = evaluateExpression($result);
+    }
+
+    function evaluateExpression($expression)
+    {
+        // logの場合の処理
+        while (strpos($expression, 'log(') !== false) {
+            $logStart = strpos($expression, 'log('); // log関数の開始位置を取得
+            $logEnd = strpos($expression, ')', $logStart); // log関数の終了位置を取得
+
+            // log関数の引数を取得
+            $logArgs = substr($expression, $logStart + 4, $logEnd - $logStart - 4);
+            $logArgs = explode(',', $logArgs);
+
+            // log関数の計算結果を取得
+            $logResult = log($logArgs[1], $logArgs[0]);
+
+            // 式中のlog関数を計算結果に置換
+            $expression = substr_replace($expression, $logResult, $logStart, $logEnd - $logStart + 1);
+        }
+
+        // 相乗を実行する
+        $expression = str_replace('^', '**', $expression);
+
+        // 不正な文字や式を排除するための正規表現パターン
+        $pattern = '/[^0-9+\-.*\/()%^,]/';
+
+        // 正規表現パターンにマッチする文字が含まれている場合はエラーとして処理する
+        if (preg_match($pattern, $expression)) {
+            return "エラー";
+        }
+
+        // 計算結果を返す
+        try {
+            eval('$result = ' . $expression . ';');
+            return $result;
+        } catch (Throwable $e) {
+            return "エラー";
+        }
     }
 
     function format_expression($expression)
@@ -93,21 +142,29 @@
 
     function format_result($result)
     {
-        // 入力された桁数を取得
-        $decimalPlaces = strlen(substr(strrchr($result, "."), 1));
-
-        // 入力された桁数まで計算結果を表示
-        return number_format($result, $decimalPlaces);
+        if (is_numeric($result)) {
+            $result = (float) $result;  // 文字列を浮動小数点数にキャストする
+            $decimalPlaces = strlen(substr(strrchr($result, "."), 1)); // 入力された桁数を取得
+            return number_format($result, $decimalPlaces); // 入力された桁数まで計算結果を表示
+        } else {
+            return "";
+        }
     }
-
     ?>
 
-
     <form method="post" action="./kadai08_1.php">
-        <input type="hidden" name="result" value="<?php echo $result; ?>" />
-
+        <input type="text" name="result" value="<?php echo $result; ?>" />
+        <h3>
+            入力式: <?php echo format_expression($result); ?>
+        </h3>
         <button class="calc-button" type="submit" value="KEY_AC" name="KEY_AC"> AC </button>
         <button class="calc-button" type="submit" value="KEY_BS" name="KEY_BS"> BS </button>
+        <button class="calc-button" type="submit" value="KEY_(" name="KEY_("> （ </button>
+        <button class="calc-button" type="submit" value="KEY_)" name="KEY_)"> ） </button>
+
+        <br>
+        <button class="calc-button" type="submit" value="KEY_log" name="KEY_log"> log </button>
+        <button class="calc-button" type="submit" value="KEY_syn" name="KEY_syn"> ^ </button>
         <button class="calc-button" type="submit" value="KEY_%" name="KEY_%"> ％ </button>
         <button class="calc-button" type="submit" value="KEY_/" name="KEY_/">&divide;</button>
         <br>
@@ -129,17 +186,15 @@
         <button class="calc-button" type="submit" value="KEY_0" name="KEY_0"> 0 </button>
         <button class="calc-button" type="submit" value="KEY_00" name="KEY_00"> 00 </button>
         <button class="calc-button" type="submit" value="KEY_deci" name="KEY_deci"> . </button>
-        <button class="calc-button" type="submit" value="KEY_=" name="KEY_="> = </button>
+        <button class="calc-button" type="submit" value="KEY_comma" name="KEY_comma"> , </button>
+        <br>
+        <button class="calc-button" style="width: 245px" type="submit" value="KEY_=" name="KEY_="> = </button>
     </form>
 
     <!-- 計算結果の出力 -->
-    <p>
-        入力式: <?php echo format_expression($result); ?>
-    </p>
-
-    <p>
+    <h3>
         計算結果: <?php echo format_result($result); ?>
-    </p>
+    </h3>
 
 </body>
 
