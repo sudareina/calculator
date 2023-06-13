@@ -35,6 +35,7 @@
 
     <?php
     $result = isset($_POST['result']) ? $_POST['result'] : '';
+    $result2 = isset($_POST['result2']) ? $_POST['result2'] : '';
 
     if (isset($_POST['KEY_1'])) {
         $result .= '1';
@@ -92,7 +93,7 @@
         }
     } elseif (isset($_POST['KEY_='])) {
         // 入力式のパースと評価
-        $result = evaluateExpression($result);
+        $result2 = evaluateExpression($result);
     }
 
     function evaluateExpression($expression)
@@ -193,7 +194,7 @@
 
     <!-- 計算結果の出力 -->
     <h3>
-        計算結果: <?php echo format_result($result); ?>
+        計算結果: <?php echo format_result($result2); ?>
     </h3>
 
 </body>
