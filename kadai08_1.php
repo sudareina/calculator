@@ -83,6 +83,14 @@
         $result .= '^';
     } elseif (isset($_POST['KEY_log'])) {
         $result .= 'log(';
+    } elseif (isset($_POST['KEY_sin'])) {
+        $result .= 'sin(';
+    } elseif (isset($_POST['KEY_cos'])) {
+        $result .= 'cos(';
+    } elseif (isset($_POST['KEY_tan'])) {
+        $result .= 'tan(';
+    } elseif (isset($_POST['KEY_exp'])) {
+        $result .= 'exp(';
     } elseif (isset($_POST['KEY_comma'])) {
         $result .= ',';
     } elseif (isset($_POST['KEY_deci'])) {
@@ -112,6 +120,66 @@
 
             // 式中のlog関数を計算結果に置換
             $expression = substr_replace($expression, $logResult, $logStart, $logEnd - $logStart + 1);
+        }
+
+        // sinの場合の処理
+        while (strpos($expression, 'sin(') !== false) {
+            $sinStart = strpos($expression, 'sin('); // sin関数の開始位置を取得
+            $sinEnd = strpos($expression, ')', $sinStart); // sin関数の終了位置を取得
+
+            // sin関数の引数を取得
+            $sinArg = substr($expression, $sinStart + 4, $sinEnd - $sinStart - 4);
+
+            // sin関数の計算結果を取得
+            $sinResult = sin($sinArg);
+
+            // 式中のsin関数を計算結果に置換
+            $expression = substr_replace($expression, $sinResult, $sinStart, $sinEnd - $sinStart + 1);
+        }
+
+        // cosの場合の処理
+        while (strpos($expression, 'cos(') !== false) {
+            $cosStart = strpos($expression, 'cos('); // cos関数の開始位置を取得
+            $cosEnd = strpos($expression, ')', $cosStart); // cos関数の終了位置を取得
+
+            // cos関数の引数を取得
+            $cosArg = substr($expression, $cosStart + 4, $cosEnd - $cosStart - 4);
+
+            // cos関数の計算結果を取得
+            $cosResult = cos($cosArg);
+
+            // 式中のcos関数を計算結果に置換
+            $expression = substr_replace($expression, $cosResult, $cosStart, $cosEnd - $cosStart + 1);
+        }
+
+        // tanの場合の処理
+        while (strpos($expression, 'tan(') !== false) {
+            $tanStart = strpos($expression, 'tan('); // tan関数の開始位置を取得
+            $tanEnd = strpos($expression, ')', $tanStart); // tan関数の終了位置を取得
+
+            // tan関数の引数を取得
+            $tanArg = substr($expression, $tanStart + 4, $tanEnd - $tanStart - 4);
+
+            // tan関数の計算結果を取得
+            $tanResult = tan($tanArg);
+
+            // 式中のtan関数を計算結果に置換
+            $expression = substr_replace($expression, $tanResult, $tanStart, $tanEnd - $tanStart + 1);
+        }
+
+        // expの場合の処理
+        while (strpos($expression, 'exp(') !== false) {
+            $expStart = strpos($expression, 'exp('); // exp関数の開始位置を取得
+            $expEnd = strpos($expression, ')', $expStart); // exp関数の終了位置を取得
+
+            // exp関数の引数を取得
+            $expArg = substr($expression, $expStart + 4, $expEnd - $expStart - 4);
+
+            // exp関数の計算結果を取得
+            $expResult = exp($expArg);
+
+            // 式中のexp関数を計算結果に置換
+            $expression = substr_replace($expression, $expResult, $expStart, $expEnd - $expStart + 1);
         }
 
         // 相乗を実行する
@@ -153,7 +221,7 @@
     }
     ?>
 
-    <form method="post" action="./kadai08_1.php">
+<form method="post" action="./kadai08_1.php">
         <input type="text" name="result" value="<?php echo $result; ?>" />
         <h3>
             入力式: <?php echo format_expression($result); ?>
@@ -165,8 +233,14 @@
 
         <br>
         <button class="calc-button" type="submit" value="KEY_log" name="KEY_log"> log </button>
+        <button class="calc-button" type="submit" value="KEY_exp" name="KEY_exp"> exp </button>
         <button class="calc-button" type="submit" value="KEY_syn" name="KEY_syn"> ^ </button>
         <button class="calc-button" type="submit" value="KEY_%" name="KEY_%"> ％ </button>
+        
+        <br>
+        <button class="calc-button" type="submit" value="KEY_sin" name="KEY_sin"> sin </button>
+        <button class="calc-button" type="submit" value="KEY_cos" name="KEY_cos"> cos </button>
+        <button class="calc-button" type="submit" value="KEY_tan" name="KEY_tan"> tan </button>
         <button class="calc-button" type="submit" value="KEY_/" name="KEY_/">&divide;</button>
         <br>
         <button class="calc-button" type="submit" value="KEY_7" name="KEY_7"> 7 </button>
